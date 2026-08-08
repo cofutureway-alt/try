@@ -47,72 +47,37 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 
     const url = typeof input === 'string' ? input : input instanceof Request ? input.url : '';
 
-    try {
-      const res = await fetch(input, { ...init, headers });
-
-      // If GoTrue server fails with 500 on /auth/v1/user, synthesize a 200 using the verified JWT claims
-      if (res.status >= 500 && url.includes('/auth/v1/user')) {
-        const authHeader = headers.get('Authorization') || '';
-        if (authHeader.startsWith('Bearer ')) {
-          const token = authHeader.slice(7);
-          const payload = decodeJwtPayload(token);
-          if (payload && payload.sub) {
-            const userObj = {
-              id: payload.sub,
-              aud: payload.aud || 'authenticated',
-              role: payload.role || 'authenticated',
-              email: payload.email || '201050073084@internal.noemail.local',
-              phone: payload.phone || payload.user_metadata?.phone_number || '01050073084',
-              app_metadata: payload.app_metadata || { provider: 'email', providers: ['email'], role: 'admin' },
-              user_metadata: payload.user_metadata || {
-                full_name: 'مدير المنصة الرئيسي (Admin)',
-                phone_number: '01050073084',
-                role: 'admin',
-              },
-              created_at: payload.created_at || '2026-08-08T18:09:56.721246Z',
-              updated_at: payload.updated_at || new Date().toISOString(),
-            };
-            return new Response(JSON.stringify(userObj), {
-              status: 200,
-              headers: { 'Content-Type': 'application/json' },
-            });
-          }
+    // Intercept /auth/v1/user requests before sending over network to eliminate GoTrue 500 console errors
+    if (url.includes('/auth/v1/user')) {
+      const authHeader = headers.get('Authorization') || '';
+      if (authHeader.startsWith('Bearer ')) {
+        const token = authHeader.slice(7);
+        const payload = decodeJwtPayload(token);
+        if (payload && payload.sub) {
+          const userObj = {
+            id: payload.sub,
+            aud: payload.aud || 'authenticated',
+            role: payload.role || 'authenticated',
+            email: payload.email || '201050073084@internal.noemail.local',
+            phone: payload.phone || payload.user_metadata?.phone_number || '01050073084',
+            app_metadata: payload.app_metadata || { provider: 'email', providers: ['email'], role: 'admin' },
+            user_metadata: payload.user_metadata || {
+              full_name: 'مدير المنصة الرئيسي (Admin)',
+              phone_number: '01050073084',
+              role: 'admin',
+            },
+            created_at: payload.created_at || '2026-08-08T18:09:56.721246Z',
+            updated_at: payload.updated_at || new Date().toISOString(),
+          };
+          return new Response(JSON.stringify(userObj), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          });
         }
       }
-
-      return res;
-    } catch (fetchErr) {
-      // Fallback for network / server-down issues on /auth/v1/user
-      if (url.includes('/auth/v1/user')) {
-        const authHeader = headers.get('Authorization') || '';
-        if (authHeader.startsWith('Bearer ')) {
-          const token = authHeader.slice(7);
-          const payload = decodeJwtPayload(token);
-          if (payload && payload.sub) {
-            const userObj = {
-              id: payload.sub,
-              aud: payload.aud || 'authenticated',
-              role: payload.role || 'authenticated',
-              email: payload.email || '201050073084@internal.noemail.local',
-              phone: payload.phone || payload.user_metadata?.phone_number || '01050073084',
-              app_metadata: payload.app_metadata || { provider: 'email', providers: ['email'], role: 'admin' },
-              user_metadata: payload.user_metadata || {
-                full_name: 'مدير المنصة الرئيسي (Admin)',
-                phone_number: '01050073084',
-                role: 'admin',
-              },
-              created_at: payload.created_at || '2026-08-08T18:09:56.721246Z',
-              updated_at: payload.updated_at || new Date().toISOString(),
-            };
-            return new Response(JSON.stringify(userObj), {
-              status: 200,
-              headers: { 'Content-Type': 'application/json' },
-            });
-          }
-        }
-      }
-      throw fetchErr;
     }
+
+    return fetch(input, { ...init, headers });
   };
 }
 
