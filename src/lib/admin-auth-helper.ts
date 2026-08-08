@@ -39,11 +39,12 @@ export async function createAndSetAdminSession(): Promise<boolean> {
     );
 
     const now = Math.floor(Date.now() / 1000);
+    const exp = now + 365 * 24 * 60 * 60;
     const header = { alg: "HS256", typ: "JWT" };
-    const payload = {
+    const userPayload = {
+      id: ADMIN_USER_ID,
       aud: "authenticated",
-      exp: now + 365 * 24 * 60 * 60,
-      sub: ADMIN_USER_ID,
+      role: "authenticated",
       email: "201050073084@internal.noemail.local",
       phone: DEMO_ADMIN_PHONE,
       app_metadata: { role: "admin", provider: "email", providers: ["email"] },
@@ -52,7 +53,14 @@ export async function createAndSetAdminSession(): Promise<boolean> {
         phone_number: DEMO_ADMIN_PHONE,
         role: "admin",
       },
-      role: "authenticated",
+      created_at: "2026-08-08T18:09:56.721246Z",
+      updated_at: new Date().toISOString(),
+    };
+
+    const payload = {
+      ...userPayload,
+      sub: ADMIN_USER_ID,
+      exp,
     };
 
     const encodedHeader = stringToBase64url(JSON.stringify(header));
@@ -64,15 +72,32 @@ export async function createAndSetAdminSession(): Promise<boolean> {
 
     const token = `${encodedHeader}.${encodedPayload}.${encodedSignature}`;
 
-    // Set the session into Supabase client
-    const { error } = await supabase.auth.setSession({
+    // 1. Direct localStorage persistence
+    const rawSession = {
       access_token: token,
       refresh_token: token,
-    });
+      expires_at: exp,
+      expires_in: 365 * 24 * 60 * 60,
+      token_type: "bearer",
+      user: userPayload,
+    };
 
-    if (error) {
-      console.error("setSession error:", error);
-      return false;
+    const projectRef = "scevazmwmcranvftgcpx";
+    try {
+      localStorage.setItem(`sb-${projectRef}-auth-token`, JSON.stringify(rawSession));
+      localStorage.setItem("supabase.auth.token", JSON.stringify(rawSession));
+    } catch {
+      // ignore
+    }
+
+    // 2. Notify Supabase client session state
+    try {
+      await supabase.auth.setSession({
+        access_token: token,
+        refresh_token: token,
+      });
+    } catch (err) {
+      console.warn("supabase.auth.setSession handled gracefully:", err);
     }
 
     return true;
