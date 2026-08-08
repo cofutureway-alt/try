@@ -60,7 +60,6 @@ const isGroup = (e: NavEntry): e is GroupItem => (e as GroupItem).children !== u
 
 const nav: NavEntry[] = [
   { to: "/admin", label: "الإحصائيات", icon: BarChart3, end: true },
-  { to: "/admin/renewal-payments", label: "سجل سداد التجديد", icon: Coins },
   {
     id: "academics",
     label: "المحتوى التعليمي",
