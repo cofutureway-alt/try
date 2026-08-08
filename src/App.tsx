@@ -100,6 +100,7 @@ import MyBookOrders from "./pages/student/MyBookOrders";
 import Branches from "./pages/Branches";
 import AdminBranches from "./pages/admin/AdminBranches";
 import AdminTestimonials from "./pages/admin/AdminTestimonials";
+import { ExperimentalNoticeModal } from "./components/ExperimentalNoticeModal";
 
 
 const queryClient = new QueryClient();
@@ -108,6 +109,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
     <TooltipProvider>
+      <ExperimentalNoticeModal />
       <Toaster />
       <Sonner position="top-center" richColors closeButton />
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
