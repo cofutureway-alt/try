@@ -820,23 +820,134 @@ async function seed() {
     `);
   }
 
-  // Also add purchase codes for the new books
-  console.log('🔑 7. Adding Book Activation / Promo Codes...');
-  const bookCodes = [
-    { code: 'BOOK-GRAMMAR-2026', target_type: 'course', target_id: course1Id, max_uses: 100, use_count: 10 },
-    { code: 'BOOK-BALAGHA-VIP', target_type: 'course', target_id: course2Id, max_uses: 50, use_count: 5 },
-    { code: 'FREE-BOOK-ACCESS', target_type: 'course', target_id: course3Id, max_uses: 200, use_count: 25 }
+  // ==========================================
+  // 13. BUNDLES (الباقات وحزم الكورسات التوفيرية)
+  // ==========================================
+  console.log('📦 13. Creating Arabic Course Bundles (الباقات والحزم)...');
+  const bundle1Id = '77777777-0001-4777-8777-777777777771';
+  const bundle2Id = '77777777-0002-4777-8777-777777777772';
+  const bundle3Id = '77777777-0003-4777-8777-777777777773';
+  const bundle4Id = '77777777-0004-4777-8777-777777777774';
+
+  const bundlesData = [
+    {
+      id: bundle1Id,
+      title: 'باقة التفوق الشاملة في اللغة العربية للثانوية العامة 2026 (العرض الذهبي)',
+      slug: 'thanawya-amma-super-bundle-2026',
+      description: 'الباقة المتكاملة لطلاب الثانوية العامة: تشمل كورس النحو الشامل كاملاً + دورة البلاغة والأدب المكثفة وحل النصوص المتحررة + كبسولات التذوق الفني مع بنك أسئلة شامل وحصص مراجعة دورية.',
+      cover_image_url: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&auto=format&fit=crop&q=80',
+      status: 'published',
+      is_paid: true,
+      price_piastres: 55000,
+      discount_price_piastres: 39000,
+      discount_expires_at: 'now() + interval \'60 days\'',
+      stage_id: stage3Id,
+      subject_id: subjGrammarId,
+      is_featured: true
+    },
+    {
+      id: bundle2Id,
+      title: 'باقة التأسيس والتمكن من الصفر لجميع المراحل (النحو + البلاغة)',
+      slug: 'arabic-foundations-master-bundle',
+      description: 'باقة تأسيسية متقدمة تنقلك من الصفر في الإعراب واستخراج الصور البلاغية إلى مستوى الإتقان والحل النموذجي لكافة المراحل الثانوية والإعدادية.',
+      cover_image_url: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&auto=format&fit=crop&q=80',
+      status: 'published',
+      is_paid: true,
+      price_piastres: 30000,
+      discount_price_piastres: 19900,
+      discount_expires_at: 'now() + interval \'45 days\'',
+      stage_id: stage1Id,
+      subject_id: subjGrammarId,
+      is_featured: true
+    },
+    {
+      id: bundle3Id,
+      title: 'باقة الفرسان المتكاملة للصف الثاني الثانوي (الترم الأول + التأسيس الذهبي)',
+      slug: 'sec2-complete-arabic-bundle',
+      description: 'تشمل منهج الصف الثاني الثانوي كاملاً في الأدب والنصوص والنحو بالإضافة إلى دورة التأسيس الذهبية لتقوية المهارات التراكمية في الإعراب.',
+      cover_image_url: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=800&auto=format&fit=crop&q=80',
+      status: 'published',
+      is_paid: true,
+      price_piastres: 35000,
+      discount_price_piastres: 24000,
+      discount_expires_at: 'now() + interval \'45 days\'',
+      stage_id: stage2Id,
+      subject_id: subjLiteratureId,
+      is_featured: false
+    },
+    {
+      id: bundle4Id,
+      title: 'باقة البلاغة والنصوص والأدب الشاملة (جميع المدارس الشعرية)',
+      slug: 'rhetoric-literature-complete-pack',
+      description: 'الحزمة الشاملة للتذوق الفني: تشمل دورة البلاغة والأدب المكثفة مع كبسولات البلاغة السريعة وحل النصوص المتحررة طبقاً لأحدث مواصفات امتحانات الثانوية.',
+      cover_image_url: 'https://images.unsplash.com/photo-1471107340929-a87cd0f5b5f3?w=800&auto=format&fit=crop&q=80',
+      status: 'published',
+      is_paid: true,
+      price_piastres: 32000,
+      discount_price_piastres: 22000,
+      discount_expires_at: 'now() + interval \'30 days\'',
+      stage_id: stage3Id,
+      subject_id: subjRhetoricId,
+      is_featured: false
+    }
   ];
 
-  for (const c of bookCodes) {
+  for (const b of bundlesData) {
     await query(`
-      INSERT INTO public.purchase_codes (code, target_type, target_id, max_uses, use_count, expires_at)
-      VALUES ('${c.code}', '${c.target_type}', '${c.target_id}', ${c.max_uses}, ${c.use_count}, now() + interval '180 days')
-      ON CONFLICT DO NOTHING;
+      INSERT INTO public.bundles (
+        id, title, slug, description, cover_image_url,
+        status, is_paid, price_piastres, discount_price_piastres,
+        discount_expires_at, stage_id, subject_id, is_featured, featured_at
+      )
+      VALUES (
+        '${b.id}',
+        ${escapeSql(b.title)},
+        ${escapeSql(b.slug)},
+        ${escapeSql(b.description)},
+        ${escapeSql(b.cover_image_url)},
+        '${b.status}',
+        ${b.is_paid},
+        ${b.price_piastres},
+        ${b.discount_price_piastres},
+        ${b.discount_expires_at},
+        '${b.stage_id}',
+        '${b.subject_id}',
+        ${b.is_featured},
+        ${b.is_featured ? 'now()' : 'NULL'}
+      )
+      ON CONFLICT (id) DO UPDATE SET
+        title = EXCLUDED.title,
+        slug = EXCLUDED.slug,
+        description = EXCLUDED.description,
+        cover_image_url = EXCLUDED.cover_image_url,
+        status = EXCLUDED.status,
+        price_piastres = EXCLUDED.price_piastres,
+        discount_price_piastres = EXCLUDED.discount_price_piastres,
+        is_featured = EXCLUDED.is_featured;
     `);
   }
 
-  console.log('\n🎉 ALL LESSONS, REAL YOUTUBE VIDEOS, ALL UNITS, AND 6 BOOKS SUCCESSFULLY ADDED & CONNECTED!');
+  const bundleCoursesData = [
+    { bundle_id: bundle1Id, course_id: course1Id, position: 1 },
+    { bundle_id: bundle1Id, course_id: course2Id, position: 2 },
+    { bundle_id: bundle1Id, course_id: course5Id, position: 3 },
+    { bundle_id: bundle2Id, course_id: course3Id, position: 1 },
+    { bundle_id: bundle2Id, course_id: course5Id, position: 2 },
+    { bundle_id: bundle3Id, course_id: course4Id, position: 1 },
+    { bundle_id: bundle3Id, course_id: course3Id, position: 2 },
+    { bundle_id: bundle4Id, course_id: course2Id, position: 1 },
+    { bundle_id: bundle4Id, course_id: course5Id, position: 2 }
+  ];
+
+  for (const bc of bundleCoursesData) {
+    await query(`
+      INSERT INTO public.bundle_courses (bundle_id, course_id, position)
+      VALUES ('${bc.bundle_id}', '${bc.course_id}', ${bc.position})
+      ON CONFLICT (bundle_id, course_id) DO UPDATE SET position = EXCLUDED.position;
+    `);
+  }
+
+  console.log('\n🎉 ALL ARABIC COURSES, YOUTUBE LESSONS, 6 BOOKS, AND 4 BUNDLES SUCCESSFULLY CONFIGURED!');
 }
 
 seed().catch(console.error);
