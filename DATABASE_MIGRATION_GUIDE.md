@@ -47,13 +47,13 @@ npx supabase functions deploy
 | `avatars` | 🌐 Public |
 | `quiz-images` | 🌐 Public |
 | `testimonial-images` | 🌐 Public |
-| `leaderboard-assets` | 🌐 Public |
-| `card-assets` | 🌐 Public |
-| `book-assets` | 🌐 Public |
-| `lesson-files` | 🌐 Public |
-| `assignment-files` | 🌐 Public |
-| `payment-proofs` | 🌐 Public |
+| `card-assets` | 🔒 Private |
+| `payment-proofs` | 🔒 Private |
+| `lesson-files` | 🔒 Private |
+| `assignment-files` | 🔒 Private |
 | `assignment-submissions` | 🔒 Private |
+| `book-assets` | 🔒 Private |
+| `leaderboard-assets` | 🔒 Private |
 
 ---
 
