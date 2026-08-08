@@ -323,7 +323,7 @@ AS $$
 DECLARE
   v_badge_name text;
 BEGIN
-  SELECT title INTO v_badge_name FROM public.badges WHERE id = NEW.badge_id;
+  SELECT name INTO v_badge_name FROM public.badges WHERE id = NEW.badge_id;
 
   PERFORM public.create_notification(
     NEW.student_id,
