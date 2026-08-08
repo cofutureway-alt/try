@@ -297,7 +297,7 @@ export async function sendWhatsappTestMessage(params: {
 
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL ||
     (supabase as any).supabaseUrl ||
-    "https://mgrkbcipkmikggmiyvwm.supabase.co";
+    "https://scevazmwmcranvftgcpx.supabase.co";
 
   const res = await fetch(`${supabaseUrl}/functions/v1/send-whatsapp-test`, {
     method: "POST",

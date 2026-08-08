@@ -203,7 +203,7 @@ BEGIN
   IF (OLD.status IS NULL OR OLD.status <> 'graded') AND NEW.status = 'graded' THEN
     SELECT title INTO v_quiz_title FROM public.quizzes WHERE id = NEW.quiz_id;
 
-    IF NEW.is_passed IS TRUE THEN
+    IF NEW.passed IS TRUE THEN
       v_outcome := 'اجتياز بنجاح';
     ELSE
       v_outcome := 'لم يتم الاجتياز';
@@ -213,8 +213,8 @@ BEGIN
       NEW.user_id,
       'quiz_graded',
       'تم تصحيح اختبارك: ' || COALESCE(v_quiz_title, 'الاختبار'),
-      'حصلت على نتيجة ' || COALESCE(NEW.score_percent::text, '0') || '% (' || v_outcome || '). اضغط لمراجعة تقرير الاختبار.',
-      jsonb_build_object('attempt_id', NEW.id, 'score', NEW.score_percent, 'passed', NEW.is_passed),
+      'حصلت على نتيجة ' || COALESCE(NEW.percentage::text, '0') || '% (' || v_outcome || '). اضغط لمراجعة تقرير الاختبار.',
+      jsonb_build_object('attempt_id', NEW.id, 'score', NEW.percentage, 'passed', NEW.passed),
       '/dashboard/quiz-attempts',
       'quiz_attempt',
       NEW.id
